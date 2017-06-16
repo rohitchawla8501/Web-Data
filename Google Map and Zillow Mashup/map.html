@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<!-- 
+    Student Name:
+-->
+<html lang="en">
+  <head>
+    <title>Web Mashup: Display House Prices on a Map</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="initial-scale=1.0">
+        <style>
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      #map {
+        height: 100%;
+      }
+    </style>
+  
+	
+	
+  </head>
+  <body onload="initialize();">
+   <script type="text/javascript" src="map.js"></script>
+    <script type="text/javascript"
+            src="https://maps.googleapis.com/maps/api/jssigned_in=true&callback=initMap" async defer >
+</script>
+<script>
+var map;
+  var gc;
+var flag=0;
+  var latrev;
+  var longrev;
+  var gcrev;
+var markers=[];
+  var i=0;
+  var value;
+  var infowindow ;
+  var revresult1;
+var infowindowfg; 
+ var sendaddress=" ";
+ //----------------------------------------------------------------------------------------------------------------------------------- 
+  function initMap(){ 
+  var x= {lat: 32.75, lng: -97.13};
+  map = new google.maps.Map(document.getElementById('map'), {
+        center:x,
+	zoom: 17
+  });
+
+
+ 
+  google.maps.event.addListener(map, 'click', function(event) {
+ 
+ latrev=JSON.stringify(event.latLng.lat(),undefined,2);// for reverse geocoding
+ longrev=JSON.stringify(event.latLng.lng(),undefined,2); //for reverse geocoding
+
+  var infowindow = new google.maps.InfoWindow({
+    content: latrev+longrev});
+
+  //var marker = new google.maps.Marker({position: event.latLng, map: map,title:''});
+    	//infowindow.open(map, marker);
+ reversegeocode();     
+	});
+
+    
+  
+  
+	
+  }
+ 
+ //------------------------------------------------------------------------------------------------------------------
+/* function testgeocode(value)
+ {
+ flag++;
+ gc = new google.maps.Geocoder;
+ gcAddress(gc, map,value)
+ }*/
+ //------------------------------------------------------------------------------------------------------------------
+ var address=""; 
+ 
+ function gcAddress()
+ {
+address = document.getElementById("address").value;
+
+   gc = new google.maps.Geocoder;
+   //address = document.getElementById("address").value+" "+document.getElementById("city").value+" "+document.getElementById("state").value+" "+document.getElementById("zipcode").value;
+     gc.geocode({'address': address}, function(results, status) {
+   var geolat="";
+	if (status === google.maps.GeocoderStatus.OK) {
+      //console.log(address);
+	  map.setCenter(results[0].geometry.location);
+      sendaddress=results[0].formatted_address;///use this address to call send request.................................Incomplete 
+	 
+	  markers[i] = new google.maps.Marker({
+        map: map,
+        position: results[0].geometry.location
+      });
+     map.setCenter(results[0].geometry.location);
+	 
+	geolat=JSON.stringify(results[0].geometry.location,undefined,2) ;
+	
+	
+	
+	} 
+	else {
+      alert('Geocode was not successful for the following reason: ' + status);
+    }
+ 
+     //clearMarkers();
+	sendRequest(sendaddress);
+	});
+	}
+	//---------------------------------------------------------------------------------------------------
+	
+	function gcinfo(value)
+	{
+	infowindowfg = new google.maps.InfoWindow({
+    content: sendaddress+" "+value
+  });
+	infowindowfg.open(map, markers[i]);
+	var tvalue=document.getElementById("t").value;
+	tvalue=tvalue+"\n"+sendaddress+value;
+	document.getElementById("t").value=tvalue;
+	i++;
+	removeM();
+	
+	}
+//---------------------------------------------------------------------------------------------------------------	
+	function reversegeocode()
+	{
+		var latilong = {lat: parseFloat(latrev), lng: parseFloat(longrev)};
+		gc1= new google.maps.Geocoder;
+	gc1.geocode({'location':latilong},function(revresult,revstatus){
+	revresult1=revresult;
+	if (revstatus === google.maps.GeocoderStatus.OK) {
+      	  if (revresult[0]) {
+        //map.setZoom(17);
+        markers[i] = new google.maps.Marker({
+          position: latilong,
+          map: map
+        });
+        
+		infowindow = new google.maps.InfoWindow({
+    content: ' '});
+	i++;
+	sendRequest2(revresult);
+		//console.log(value);
+		//console.log(value);
+		
+       
+	  
+	  
+	  } else {
+        window.alert('No results found');
+      }
+    } else {
+      window.alert('Geocoder failed due to: ' + status);
+    }
+  });
+  
+  
+  
+  }
+	function revinfo(value){
+	infowindow.setContent(revresult1[0].formatted_address+value);
+        infowindow.open(map, markers[i-1]);
+	
+	
+	removeM();
+	var tvalue=document.getElementById("t").value;
+	tvalue=tvalue+"\n"+revresult1[0].formatted_address+value;
+	document.getElementById("t").value=tvalue;
+	}
+	//---------------------------------------------------
+	
+	
+	//-----------------------------------------------------
+	function removeM()
+	{
+	for(var j=0;j<markers.length-1;j++)
+	{
+	markers[j].setMap(null);
+	}
+	}
+	//---------------------------------------------------
+	function cleartext()
+	{
+	document.getElementById("address").value="";
+	}
+	
+	</script>
+	<form>
+       <label>House address: <input type="text" id="address"/></label>
+              
+              <input type="button" onclick="gcAddress();removeM();" value="Display Info"/>
+   <input type="button" onclick="cleartext();" value="Clear"/>
+  </form>
+    
+	<div id="map" style="width: 600px; height: 500px;"></div><br/>
+    <div id="output">&nbsp;</div>
+  <textarea id="t" cols="50" rows="100"></textarea>
+  </body>
+</html>
