@@ -2,10 +2,6 @@
 <!DOCTYPE html>
 <html>
 <body>
-//checkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk
-
-
-
 
 <form action="album.php" method="post" enctype="multipart/form-data" >
     SELECT A FILE
